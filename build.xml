@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<project name="FirstProject" basedir="." default="run">
+    <property file="build.properties"/>
+
+    <!-- description type -->
+    <description>
+    description of the project
+    </description>
+
+    <target name="clean">
+
+        <!-- Task to delete directory -->
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile" depends="clean">
+        <!-- Task to create directory -->
+        <mkdir dir="${classes.dir}"/>
+        <!-- Task to compile java classes -->
+        <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
+
+        <!-- copy all except .java files from source to target directory -->
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" excludes="**/*.java"/>
+        </copy>
+
+
+        <!-- copy all .java files from backup to archive directory -->
+        <copy todir="${archive.dir}">
+            <fileset dir="${backup.dir}" casesensitive="yes">
+                <patternset id="non.test.sources">
+                    <include name="**/*.java"/>
+                    <exclude name="**/*Test*"/>
+                </patternset>
+            </fileset>
+        </copy>
+
+        <!-- copy all .java files from src to backup directory -->
+        <copy todir="${backup.dir}">
+            <fileset dir="${src.dir}" casesensitive="yes">
+                <patternset refid="non.test.sources"/>
+            </fileset>
+        </copy>
+
+    </target>
+
+    <target name="jar" depends="compile">
+        <!-- Task to create directory -->
+        <mkdir dir="${jar.dir}"/>
+        <!-- Task to create jar file with Main-Class assignment -->
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <!-- Task to run the jar. Fork value true enables class execution in another JVM-->
+        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
+    </target>
+
+</project>
